@@ -1,5 +1,6 @@
 module Game
   class HideNSeek
+    attr_accessor :room_to_hide_in
     attr_reader :rooms
 
     def initialize
@@ -9,18 +10,29 @@ module Game
     end
 
     def lets_play!
+      "(Hint: Type 'clue' at anytime if you need a clue\n\n" +
       "Ready or Not, Here I Come!\n\n"
     end
 
     def hide
-      room = rooms.sample
-      room.hide
-      puts room
+      self.room_to_hide_in = rooms.sample
+      room_to_hide_in.hide
+      # puts room_to_hide_in
     end
 
     def ask_where_to_look
       "Where do you want to look?\n\n" +
       rooms.each_with_index.map { |room, i| "\t#{i + 1} - #{room}" }.join("\n")
+    end
+
+    def clue
+      room = rooms.sample
+      if room == room_to_hide_in
+        puts "Hiding in a room with a #{room.class::LOCATIONS.sample}"
+      else
+        puts "Not in a room with a #{room.class::LOCATIONS.sample}"
+      end
+      :hint
     end
   end
 
@@ -36,9 +48,21 @@ module Game
         self.hiding_location = locations.sample
       end
 
+      def display_locations
+        locations.each_with_index.map { |loc, i| puts "\t#{i + 1} - #{loc}" }
+      end
+
       def seek?(location)
         locations[location - 1] == hiding_location
       end
+
+      DESCRIPTOR = [
+        UNDER = "Under the",
+        IN = "In the",
+        BEHIND = "Behind the",
+        NEXT = "Next to the",
+        ONTOP = "On top of the"
+      ]
 
       def locations
         raise NotImplementedError, "locations is not implemented for #{self.class}"
@@ -46,15 +70,24 @@ module Game
     end
 
     class LivingRoom < BasicRoom
+      LOCATIONS = [
+        TABLE = "table",
+        CLOSET = "closet",
+        PICTUREFRAME = "picture frame",
+        CURTAIN = "curtain",
+        TV = "T.V.",
+        RUG = "rug",
+        CHAIR = "chair",
+      ]
       def locations
         [
-          "Under the table",
-          "In the closet",
-          "Behind the picture frame",
-          "Behind the drapes",
-          "Next to the T.V.",
-          "Under the rug",
-          "Under the chair"
+          "#{UNDER} #{TABLE}",
+          "#{IN} #{CLOSET}",
+          "#{BEHIND} #{PICTUREFRAME}",
+          "#{BEHIND} #{CURTAIN}",
+          "#{NEXT} #{TV}",
+          "#{UNDER} #{RUG}",
+          "#{UNDER} #{CHAIR}"
         ]
       end
 
@@ -63,14 +96,21 @@ module Game
       end
     end
     class Kitchen < BasicRoom
+      LOCATIONS = [
+        CUPBOARD = "cupboard",
+        FRIDGE = "fridge",
+        DISHWASHER = "dishwasher",
+        OVEN = "oven",
+        GARBAGECAN = "garbage can"
+      ]
       def locations
         [
-          "In the cupboard",
-          "Behind the fridge",
-          "In the fridge",
-          "In the dishwasher",
-          "In the oven",
-          "In the garbage can"
+          "#{IN} #{CUPBOARD}",
+          "#{BEHIND} #{FRIDGE}",
+          "#{IN} #{FRIDGE}",
+          "#{IN} #{DISHWASHER}",
+          "#{IN} #{OVEN}",
+          "#{IN} #{GARBAGECAN}"
         ]
       end
 
@@ -79,12 +119,19 @@ module Game
       end
     end
     class Bathroom < BasicRoom
+      LOCATIONS = [
+        TUB= "tub",
+        SINK= "sink",
+        TOILET= "toilet",
+        TOILETPAPER= "stack of toilet paper"
+      ]
+
       def locations
         [
-          "In the tub",
-          "Under the sink",
-          "Next to the toilet",
-          "Behind the stack of toilet paper"
+          "#{IN} #{TUB}",
+          "#{UNDER} #{SINK}",
+          "#{NEXT} #{TOILET}",
+          "#{BEHIND} #{TOILETPAPER}"
         ]
       end
 
@@ -93,13 +140,21 @@ module Game
       end
     end
     class Bedroom < BasicRoom
+      LOCATIONS = [
+         BED = "bed",
+         SHEET = "sheet",
+         PILLOW = "pillow",
+         STUFFIE = "stuffie",
+         COMFORTER = "comforter"
+      ]
+
       def locations
         [
-          "Under the bed",
-          "Under the sheets",
-          "Under the pillow",
-          "Under the big stuffies",
-          "Under the comforter"
+          "#{UNDER} #{BED}",
+          "#{UNDER} #{SHEET}s",
+          "#{UNDER} #{PILLOW}",
+          "#{UNDER} big #{STUFFIE}s",
+          "#{UNDER} #{COMFORTER}"
         ]
       end
       def to_s
@@ -107,15 +162,24 @@ module Game
       end
     end
     class PlayRoom < BasicRoom
+      LOCATIONS = [
+        TOYS = "stack of toys",
+        CLOSET = "closet",
+        BASKET = "basket",
+        SLIDE = "slide",
+        SWING = "swing",
+        MATS = "stack of A-B-C mats",
+        SHELF = "shelf"
+      ]
       def locations
         [
-          "Under the stack of toys",
-          "In the toy closet",
-          "In the toy basket",
-          "Under the slide",
-          "Under the swing",
-          "Under the stack of A-B-C mats",
-          "On top of the shelf"
+          "#{UNDER} #{TOYS}",
+          "#{IN} toy #{CLOSET}",
+          "#{IN} toy #{BASKET}",
+          "#{UNDER} #{SLIDE}",
+          "#{UNDER} #{SWING}",
+          "#{UNDER} #{MATS}",
+          "#{ONTOP} #{SHELF}"
         ]
       end
 
@@ -124,15 +188,24 @@ module Game
       end
     end
     class Office < BasicRoom
+      LOCATIONS = [
+        PAPER = "stack of paper",
+        DESK = "desk",
+        CHAIR = "chair",
+        LIGHT = "light",
+        BOOK = "book",
+        DRAWER = "drawer",
+        FAN = "fan"
+      ]
       def locations
         [
-          "Under the stack of paper",
-          "Under the desk",
-          "Under the chair",
-          "On top of the light",
-          "Behind the books",
-          "In the drawer",
-          "On top of the fan"
+          "#{UNDER} #{PAPER}",
+          "#{UNDER} #{DESK}",
+          "#{UNDER} #{CHAIR}",
+          "#{ONTOP} #{LIGHT}",
+          "#{BEHIND} #{BOOK}S",
+          "#{IN} #{DRAWER}",
+          "#{ONTOP} #{FAN}"
         ]
       end
 
@@ -154,50 +227,79 @@ class LetsPlay
   def play
     puts game.lets_play!
 
-    puts game.ask_where_to_look
-
-    puts
     room = select_room
-    until valid_room?(room)
-      puts "\nPlease enter a valid room #"
-      room = select_room
-    end
-
-    room = game.rooms[room - 1]
 
     puts "You enter the #{room}"
 
-    puts "\n Where do you want to look in the #{room}?"
-
-    room.locations.each_with_index.map { |loc, i| puts "\t#{i + 1} - #{loc}" }
-
-    location = gets.chomp.to_i
-
+    location = search_room(room)
+    while hint_given?(location)
+      location = search_room(room)
+    end
     found = room.seek?(location)
 
-
     until found
-      puts "Sorry, couldn't find the person #{location}"
+      puts "Sorry, couldn't find the person #{room.locations[location - 1]}"
 
-      puts "Please look again!"
+      puts "Would you like to search the room again? (yes/no) "
+      answer = get_user_input to_i: false
 
-      room.locations.each_with_index.map { |loc, i| puts "\t#{i + 1} - #{loc}" }
+      if answer.downcase[0] == 'y'
+        location = search_room(room)
+        found = room.seek?(location)
+      else
+        room = select_room
 
-      location = gets.chomp.to_i
+        puts "You enter the #{room}"
 
-      found = room.seek?(location)
+        location = search_room(room)
+        found = room.seek?(location)
+      end
     end
 
     puts "You found the person!"
   end
 
   def select_room
+    puts game.ask_where_to_look
     print "Select a room to enter: "
-    gets.chomp.to_i
+    room = get_user_input
+    while hint_given?(room)
+      print "Select a room to enter: "
+      room = get_user_input
+    end
+    validate_room(room)
+    game.rooms[room - 1]
+  end
+
+  def hint_given? room
+    room == :hint
+  end
+
+  def get_user_input(to_i: true)
+    input = gets.chomp
+    return game.clue if input == 'clue'
+    return input.to_i if to_i
+    input
+  end
+
+  def validate_room(room)
+    until valid_room?(room)
+      puts "\nPlease enter a valid room #"
+      room = select_room
+    end
+    room
   end
 
   def valid_room? room
     room > 0 && room <= game.rooms.length
+  end
+
+  def search_room room
+    puts "\n Where do you want to look in the #{room}?"
+
+    room.display_locations
+
+    get_user_input
   end
 end
 
